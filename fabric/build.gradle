@@ -47,7 +47,7 @@ dependencies {
     include "de.erdbeerbaerlp:dcintegration.common:$rootProject.core_version"
 
     include(modImplementation('me.lucko:fabric-permissions-api:0.3.4-SNAPSHOT'))
-    modImplementation include("eu.pb4:placeholder-api:2.5.0-pre.1+1.21.2")
+    modImplementation include("eu.pb4:placeholder-api:2.5.0+1.21.2")
     modCompileOnly "maven.modrinth:styled-chat:2.7.0+1.21.2"
 }
 
