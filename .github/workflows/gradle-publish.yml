@@ -8,8 +8,14 @@
 name: Gradle Package
 
 on:
-  release:
-    types: [created]
+  workflow_dispatch:
+  push:
+   paths-ignore:
+     - '.gitignore'
+     - 'CONTRIBUTING.md'
+     - 'LICENSE'
+     - 'README.md'
+     - 'licenseheader.txt'
 
 jobs:
   build:
