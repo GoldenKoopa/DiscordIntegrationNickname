@@ -1,7 +1,9 @@
+import net.darkhax.curseforgegradle.UploadArtifact
+
 plugins {
-    id 'com.github.johnrengelman.shadow'
+    id 'com.gradleup.shadow'
     id "com.modrinth.minotaur"
-    id "com.matthewprenger.cursegradle"
+    id "net.darkhax.curseforgegradle"
 }
 
 architectury {
@@ -94,24 +96,24 @@ modrinth{
         versionType = project.releaseType.toUpperCase()
     }
 }
-curseforge {
+task publishCurseForge(type: net.darkhax.curseforgegradle.TaskPublishCurseForge) {
     if (project.hasProperty('curseforge.apikey')) { // $GRADLE_USER_HOME/gradle.properties
-        apiKey = getProperty("curseforge.apikey")
-        project {
-            id = '324952'
-            changelog = project.changelog
-            releaseType = project.releaseType.toLowerCase()
-            addGameVersion "${project.minecraft_version}"
-            mainArtifact(jar) {
-                displayName = "DiscordIntegration-NeoForge ${project.mod_version} (MC ${project.minecraft_version})"
-            }
-            relations {
-                optionalDependency("vanishmod")
-                optionalDependency("dynmapforge")
-                optionalDependency("luckpems")
-            }
-        }
+        apiToken = getProperty("curseforge.apikey")
+
+        UploadArtifact mainFile = upload(324952, remapJar)
+        mainFile.releaseType = project.releaseType.toLowerCase()
+        mainFile.changelog = project.changelog
+        mainFile.changelogType = 'markdown'
+        mainFile.displayName = "DiscordIntegration-NeoForge ${project.mod_version} (MC ${project.minecraft_version})"
+        mainFile.addModLoader("neoforge")
+        mainFile.addGameVersion("${project.minecraft_version}")
+
+        mainFile.addOptional("vanishmod")
+        mainFile.addOptional("dynmapforge")
+        mainFile.addOptional("luckperms")
+
     }
 }
 
-tasks.release.dependsOn(tasks.build, tasks.curseforge, tasks.modrinth)
+
+tasks.release.dependsOn(tasks.build, publishCurseForge, tasks.modrinth)
