@@ -30,6 +30,8 @@ repositories {
         name = 'NeoForged'
         url = 'https://maven.neoforged.net/releases'
     }
+
+    maven { url 'https://jitpack.io' }
 }
 
 dependencies {
@@ -40,6 +42,9 @@ dependencies {
     modImplementation("de.erdbeerbaerlp:dcintegration.common:$rootProject.core_version")
     forgeRuntimeLibrary("de.erdbeerbaerlp:dcintegration.common:$rootProject.core_version")
     shadowBundle("de.erdbeerbaerlp:dcintegration.common:$rootProject.core_version")
+
+    //Dynmap-API
+    modCompileOnly('com.github.webbukkit:DynmapCoreAPI:2.5')
 }
 
 processResources {
