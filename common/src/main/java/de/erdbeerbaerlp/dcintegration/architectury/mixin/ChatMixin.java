@@ -20,6 +20,5 @@ public class ChatMixin {
     public void chatMessage(PlayerList instance, PlayerChatMessage signedMessage, ServerPlayer sender, ChatType.Bound bound) {
         signedMessage = DiscordIntegrationMod.handleChatMessage(signedMessage, sender);
         instance.broadcastChatMessage( signedMessage, sender, bound);
-
     }
 }

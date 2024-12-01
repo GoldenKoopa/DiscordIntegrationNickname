@@ -3,17 +3,15 @@ package de.erdbeerbaerlp.dcintegration.architectury.command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import de.erdbeerbaerlp.dcintegration.architectury.util.ArchitecturyServerInterface;
+import de.erdbeerbaerlp.dcintegration.architectury.util.ServerInterface;
 import de.erdbeerbaerlp.dcintegration.common.DiscordIntegration;
 import de.erdbeerbaerlp.dcintegration.common.minecraftCommands.MCSubCommand;
 import de.erdbeerbaerlp.dcintegration.common.minecraftCommands.McCommandRegistry;
 import de.erdbeerbaerlp.dcintegration.common.storage.Configuration;
 import de.erdbeerbaerlp.dcintegration.common.util.MinecraftPermission;
-import net.minecraft.commands.CommandSource;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.*;
-import net.minecraft.server.ServerInterface;
 
 public class McCommandDiscord {
     public McCommandDiscord(CommandDispatcher<CommandSourceStack> dispatcher) {
@@ -25,7 +23,7 @@ public class McCommandDiscord {
             return 0;
         }).requires((s) -> {
             try {
-                return ((ArchitecturyServerInterface) DiscordIntegration.INSTANCE.getServerInterface()).playerHasPermissions(s.getPlayerOrException(), MinecraftPermission.USER, MinecraftPermission.RUN_DISCORD_COMMAND);
+                return ((ServerInterface) DiscordIntegration.INSTANCE.getServerInterface()).playerHasPermissions(s.getPlayerOrException(), MinecraftPermission.USER, MinecraftPermission.RUN_DISCORD_COMMAND);
             }catch (CommandSyntaxException e) {
                 return true;
             }

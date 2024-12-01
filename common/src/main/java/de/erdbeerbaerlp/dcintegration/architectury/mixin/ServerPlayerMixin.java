@@ -1,6 +1,6 @@
 package de.erdbeerbaerlp.dcintegration.architectury.mixin;
 
-import de.erdbeerbaerlp.dcintegration.architectury.util.ArchitecturyMessageUtils;
+import de.erdbeerbaerlp.dcintegration.architectury.util.MessageUtilsImpl;
 import de.erdbeerbaerlp.dcintegration.common.DiscordIntegration;
 import de.erdbeerbaerlp.dcintegration.common.storage.Configuration;
 import de.erdbeerbaerlp.dcintegration.common.storage.Localization;
@@ -32,7 +32,7 @@ public class ServerPlayerMixin {
             if (LinkManager.isPlayerLinked(p.getUUID()) && LinkManager.getLink(null, p.getUUID()).settings.hideFromDiscord)
                 return;
             final Component deathMessage = s.getLocalizedDeathMessage(p);
-            final MessageEmbed embed = ArchitecturyMessageUtils.genItemStackEmbedIfAvailable(deathMessage, p.level());
+            final MessageEmbed embed = MessageUtilsImpl.genItemStackEmbedIfAvailable(deathMessage, p.level());
             if (!Localization.instance().playerDeath.isBlank())
                 if (Configuration.instance().embedMode.enabled && Configuration.instance().embedMode.deathMessage.asEmbed) {
                     final String avatarURL = Configuration.instance().webhook.playerAvatarURL.replace("%uuid%", p.getUUID().toString()).replace("%uuid_dashless%", p.getUUID().toString().replace("-", "")).replace("%name%", p.getName().getString()).replace("%randomUUID%", UUID.randomUUID().toString());
@@ -40,10 +40,10 @@ public class ServerPlayerMixin {
                         final EmbedBuilder b = Configuration.instance().embedMode.deathMessage.toEmbedJson(Configuration.instance().embedMode.deathMessage.customJSON
                                 .replace("%uuid%", p.getUUID().toString())
                                 .replace("%uuid_dashless%", p.getUUID().toString().replace("-", ""))
-                                .replace("%name%", ArchitecturyMessageUtils.formatPlayerName(p))
+                                .replace("%name%", MessageUtilsImpl.formatPlayerName(p))
                                 .replace("%randomUUID%", UUID.randomUUID().toString())
                                 .replace("%avatarURL%", avatarURL)
-                                .replace("%deathMessage%", ChatFormatting.stripFormatting(deathMessage.getString()).replace(ArchitecturyMessageUtils.formatPlayerName(p) + " ", ""))
+                                .replace("%deathMessage%", ChatFormatting.stripFormatting(deathMessage.getString()).replace(MessageUtilsImpl.formatPlayerName(p) + " ", ""))
                                 .replace("%playerColor%", ""+ TextColors.generateFromUUID(p.getUUID()).getRGB())
                         );
                         if (embed != null) {
@@ -53,7 +53,7 @@ public class ServerPlayerMixin {
                         DiscordIntegration.INSTANCE.sendMessage(new DiscordMessage(b.build()),INSTANCE.getChannel(Configuration.instance().advanced.deathsChannelID));
                     }else {
                         final EmbedBuilder b = Configuration.instance().embedMode.deathMessage.toEmbed();
-                        b.setDescription(":skull: " + Localization.instance().playerDeath.replace("%player%", ArchitecturyMessageUtils.formatPlayerName(p)).replace("%msg%", ChatFormatting.stripFormatting(deathMessage.getString()).replace(ArchitecturyMessageUtils.formatPlayerName(p) + " ", "")));
+                        b.setDescription(":skull: " + Localization.instance().playerDeath.replace("%player%", MessageUtilsImpl.formatPlayerName(p)).replace("%msg%", ChatFormatting.stripFormatting(deathMessage.getString()).replace(MessageUtilsImpl.formatPlayerName(p) + " ", "")));
                         if (embed != null) {
                             b.addBlankField(false);
                             b.addField(embed.getTitle() + " *(" + embed.getFooter().getText() + ")*", embed.getDescription(), false);
@@ -61,7 +61,7 @@ public class ServerPlayerMixin {
                         DiscordIntegration.INSTANCE.sendMessage(new DiscordMessage(b.build()), DiscordIntegration.INSTANCE.getChannel(Configuration.instance().advanced.deathsChannelID));
                     }
                 } else
-                    DiscordIntegration.INSTANCE.sendMessage(new DiscordMessage(embed, Localization.instance().playerDeath.replace("%player%", ArchitecturyMessageUtils.formatPlayerName(p)).replace("%msg%",  ChatFormatting.stripFormatting(deathMessage.getString()).replace(ArchitecturyMessageUtils.formatPlayerName(p) + " ", ""))), DiscordIntegration.INSTANCE.getChannel(Configuration.instance().advanced.deathsChannelID));
+                    DiscordIntegration.INSTANCE.sendMessage(new DiscordMessage(embed, Localization.instance().playerDeath.replace("%player%", MessageUtilsImpl.formatPlayerName(p)).replace("%msg%",  ChatFormatting.stripFormatting(deathMessage.getString()).replace(MessageUtilsImpl.formatPlayerName(p) + " ", ""))), DiscordIntegration.INSTANCE.getChannel(Configuration.instance().advanced.deathsChannelID));
         }
     }
 }

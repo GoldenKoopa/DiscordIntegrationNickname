@@ -11,4 +11,6 @@ rootProject.name = 'dcintegration'
 
 include 'common'
 include 'fabric'
+include 'fabric-like'
+include 'quilt'
 include 'neoforge'

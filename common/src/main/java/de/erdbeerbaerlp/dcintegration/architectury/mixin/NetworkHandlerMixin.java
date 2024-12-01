@@ -2,7 +2,7 @@ package de.erdbeerbaerlp.dcintegration.architectury.mixin;
 
 
 import de.erdbeerbaerlp.dcintegration.architectury.DiscordIntegrationMod;
-import de.erdbeerbaerlp.dcintegration.architectury.util.ArchitecturyMessageUtils;
+import de.erdbeerbaerlp.dcintegration.architectury.util.MessageUtilsImpl;
 import de.erdbeerbaerlp.dcintegration.common.DiscordIntegration;
 import de.erdbeerbaerlp.dcintegration.common.storage.Configuration;
 import de.erdbeerbaerlp.dcintegration.common.storage.Localization;
@@ -50,29 +50,29 @@ public class NetworkHandlerMixin {
                         final EmbedBuilder b = Configuration.instance().embedMode.playerLeaveMessages.toEmbedJson(Configuration.instance().embedMode.playerLeaveMessages.customJSON
                                 .replace("%uuid%", player.getUUID().toString())
                                 .replace("%uuid_dashless%", player.getUUID().toString().replace("-", ""))
-                                .replace("%name%", ArchitecturyMessageUtils.formatPlayerName(player))
+                                .replace("%name%", MessageUtilsImpl.formatPlayerName(player))
                                 .replace("%randomUUID%", UUID.randomUUID().toString())
                                 .replace("%avatarURL%", avatarURL)
                                 .replace("%playerColor%", "" + TextColors.generateFromUUID(player.getUUID()).getRGB())
                         );
                         DiscordIntegration.INSTANCE.sendMessage(new DiscordMessage(b.build()),INSTANCE.getChannel(Configuration.instance().advanced.serverChannelID));
                     } else {
-                        final EmbedBuilder b = Configuration.instance().embedMode.playerLeaveMessages.toEmbed().setAuthor(ArchitecturyMessageUtils.formatPlayerName(player), null, avatarURL)
-                                .setDescription(Localization.instance().playerLeave.replace("%player%", ArchitecturyMessageUtils.formatPlayerName(player)));
+                        final EmbedBuilder b = Configuration.instance().embedMode.playerLeaveMessages.toEmbed().setAuthor(MessageUtilsImpl.formatPlayerName(player), null, avatarURL)
+                                .setDescription(Localization.instance().playerLeave.replace("%player%", MessageUtilsImpl.formatPlayerName(player)));
                         DiscordIntegration.INSTANCE.sendMessage(new DiscordMessage(b.build()),INSTANCE.getChannel(Configuration.instance().advanced.serverChannelID));
                     }
                 } else
-                    DiscordIntegration.INSTANCE.sendMessage(Localization.instance().playerLeave.replace("%player%", ArchitecturyMessageUtils.formatPlayerName(player)),INSTANCE.getChannel(Configuration.instance().advanced.serverChannelID));
+                    DiscordIntegration.INSTANCE.sendMessage(Localization.instance().playerLeave.replace("%player%", MessageUtilsImpl.formatPlayerName(player)),INSTANCE.getChannel(Configuration.instance().advanced.serverChannelID));
             }
         } else if (DiscordIntegration.INSTANCE != null && DiscordIntegrationMod.timeouts.contains(player.getUUID())) {
             if (!Localization.instance().playerTimeout.isBlank()) {
                 if (Configuration.instance().embedMode.enabled && Configuration.instance().embedMode.playerLeaveMessages.asEmbed) {
                     final EmbedBuilder b = Configuration.instance().embedMode.playerLeaveMessages.toEmbed()
-                            .setAuthor(ArchitecturyMessageUtils.formatPlayerName(player), null, avatarURL)
-                            .setDescription(Localization.instance().playerTimeout.replace("%player%", ArchitecturyMessageUtils.formatPlayerName(player)));
+                            .setAuthor(MessageUtilsImpl.formatPlayerName(player), null, avatarURL)
+                            .setDescription(Localization.instance().playerTimeout.replace("%player%", MessageUtilsImpl.formatPlayerName(player)));
                     DiscordIntegration.INSTANCE.sendMessage(new DiscordMessage(b.build()),INSTANCE.getChannel(Configuration.instance().advanced.serverChannelID));
                 } else
-                    DiscordIntegration.INSTANCE.sendMessage(Localization.instance().playerTimeout.replace("%player%", ArchitecturyMessageUtils.formatPlayerName(player)),INSTANCE.getChannel(Configuration.instance().advanced.serverChannelID));
+                    DiscordIntegration.INSTANCE.sendMessage(Localization.instance().playerTimeout.replace("%player%", MessageUtilsImpl.formatPlayerName(player)),INSTANCE.getChannel(Configuration.instance().advanced.serverChannelID));
             }
             DiscordIntegrationMod.timeouts.remove(player.getUUID());
         }

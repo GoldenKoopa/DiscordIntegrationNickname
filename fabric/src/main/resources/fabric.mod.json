@@ -3,7 +3,7 @@
   "id": "dcintegration-fabric",
   "version": "${version}",
   "name": "Discord Integration",
-  "description": "",
+  "description": "This mod links your server chat with a channel on your discord server.",
   "authors": ["ErdbeerbaerLP"],
   "contact": {},
   "license": "MIT",
@@ -14,7 +14,7 @@
     ]
   },
   "mixins": [
-    "fabric.dcintegration.mixins.json",
+    "fabric-like.dcintegration.mixins.json",
     "dcintegration.mixins.json"
   ],
   "depends": {

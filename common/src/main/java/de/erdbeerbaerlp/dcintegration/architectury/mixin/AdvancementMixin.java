@@ -1,6 +1,6 @@
 package de.erdbeerbaerlp.dcintegration.architectury.mixin;
 
-import de.erdbeerbaerlp.dcintegration.architectury.util.ArchitecturyMessageUtils;
+import de.erdbeerbaerlp.dcintegration.architectury.util.MessageUtilsImpl;
 import de.erdbeerbaerlp.dcintegration.common.DiscordIntegration;
 import de.erdbeerbaerlp.dcintegration.common.storage.Configuration;
 import de.erdbeerbaerlp.dcintegration.common.storage.Localization;
@@ -36,7 +36,7 @@ public class AdvancementMixin {
         final Advancement advancement = advancementEntry.value();
         if (LinkManager.isPlayerLinked(player.getUUID()) && LinkManager.getLink(null, player.getUUID()).settings.hideFromDiscord)
             return;
-        if (advancement != null && advancement.display().isPresent() && advancement.display().get().shouldAnnounceChat()) {
+        if (advancement.display().isPresent() && advancement.display().get().shouldAnnounceChat()) {
 
             if (!Localization.instance().advancementMessage.isBlank()) {
                 if (Configuration.instance().embedMode.enabled && Configuration.instance().embedMode.advancementMessage.asEmbed) {
@@ -45,7 +45,7 @@ public class AdvancementMixin {
                         final EmbedBuilder b = Configuration.instance().embedMode.advancementMessage.toEmbedJson(Configuration.instance().embedMode.advancementMessage.customJSON
                                 .replace("%uuid%", player.getUUID().toString())
                                 .replace("%uuid_dashless%", player.getUUID().toString().replace("-", ""))
-                                .replace("%name%", ArchitecturyMessageUtils.formatPlayerName(player))
+                                .replace("%name%", MessageUtilsImpl.formatPlayerName(player))
                                 .replace("%randomUUID%", UUID.randomUUID().toString())
                                 .replace("%avatarURL%", avatarURL)
                                 .replace("%advName%", ChatFormatting.stripFormatting(advancement.display().get().getTitle().getString()))
@@ -58,9 +58,9 @@ public class AdvancementMixin {
                         DiscordIntegration.INSTANCE.sendMessage(new DiscordMessage(b.build()),INSTANCE.getChannel(Configuration.instance().advanced.serverChannelID));
                     } else {
                         EmbedBuilder b = Configuration.instance().embedMode.advancementMessage.toEmbed();
-                        b = b.setAuthor(ArchitecturyMessageUtils.formatPlayerName(player), null, avatarURL)
+                        b = b.setAuthor(MessageUtilsImpl.formatPlayerName(player), null, avatarURL)
                                 .setDescription(Localization.instance().advancementMessage.replace("%player%",
-                                                ChatFormatting.stripFormatting(ArchitecturyMessageUtils.formatPlayerName(player)))
+                                                ChatFormatting.stripFormatting(MessageUtilsImpl.formatPlayerName(player)))
                                         .replace("%advName%",
                                                 ChatFormatting.stripFormatting(advancement
                                                         .display().get()
@@ -79,7 +79,7 @@ public class AdvancementMixin {
                     }
                 } else
                     DiscordIntegration.INSTANCE.sendMessage(Localization.instance().advancementMessage.replace("%player%",
-                                    ChatFormatting.stripFormatting(ArchitecturyMessageUtils.formatPlayerName(player)))
+                                    ChatFormatting.stripFormatting(MessageUtilsImpl.formatPlayerName(player)))
                             .replace("%advName%",
                                     ChatFormatting.stripFormatting(advancement
                                             .display().get()
