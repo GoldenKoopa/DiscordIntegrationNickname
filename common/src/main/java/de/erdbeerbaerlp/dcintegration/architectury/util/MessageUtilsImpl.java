@@ -6,7 +6,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import de.erdbeerbaerlp.dcintegration.architectury.DiscordIntegrationMod;
 import de.erdbeerbaerlp.dcintegration.architectury.util.accessors.ShowInTooltipAccessor;
 import de.erdbeerbaerlp.dcintegration.common.DiscordIntegration;
 import de.erdbeerbaerlp.dcintegration.common.storage.Configuration;
@@ -29,9 +28,7 @@ import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.ItemEnchantments;
 import net.minecraft.world.level.Level;
 
-import java.util.Arrays;
-
-public class ArchitecturyMessageUtils extends MessageUtils {
+public class MessageUtilsImpl extends MessageUtils {
     public static String formatPlayerName(ServerPlayer player) {
         if (player.getTabListDisplayName() != null)
             return ChatFormatting.stripFormatting(player.getTabListDisplayName().getString());
@@ -45,7 +42,7 @@ public class ArchitecturyMessageUtils extends MessageUtils {
         try {
             final JsonElement jsonElement = JsonParser.parseString(Component.Serializer.toJson(component, w.registryAccess()));
 
-            System.out.println(jsonElement);
+            DiscordIntegration.LOGGER.info("JSON-Element: "+jsonElement);
             if (jsonElement.isJsonObject())
                 json = jsonElement.getAsJsonObject();
             else return null;
@@ -53,6 +50,7 @@ public class ArchitecturyMessageUtils extends MessageUtils {
             DiscordIntegration.LOGGER.error("There was an error parsing JSON", ex);
             return null;
         }
+        DiscordIntegration.LOGGER.info("JSON: "+json);
         System.out.println(json);
         if (json.has("with")) {
             final JsonArray args = json.getAsJsonArray("with");

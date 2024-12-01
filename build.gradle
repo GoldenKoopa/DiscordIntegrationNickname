@@ -3,6 +3,7 @@ plugins {
     id 'architectury-plugin' version '3.4-SNAPSHOT'
     id 'com.github.johnrengelman.shadow' version '8.1.1' apply false
     id "com.modrinth.minotaur" version "2.+" apply false
+    id "com.matthewprenger.cursegradle" version "1.4.0" apply false
 }
 architectury {
     minecraft = project.minecraft_version
@@ -14,6 +15,8 @@ allprojects {
 
 
 }
+
+
 subprojects {
     apply plugin: 'dev.architectury.loom'
     apply plugin: 'architectury-plugin'
@@ -24,11 +27,17 @@ subprojects {
         // Set up a suffixed format for the mod jar names, e.g. `example-fabric`.
         archivesName = "$rootProject.archives_name-$project.name-MC$rootProject.minecraft_version"
     }
+    task release {
+
+    }
     repositories {
         maven { url "https://repo.erdbeerbaerlp.de/repository/maven-public/" }
 
     }
-
+    configurations.all {
+        resolutionStrategy.cacheDynamicVersionsFor 3, 'minutes'
+        resolutionStrategy.cacheChangingModulesFor 3, 'minutes'
+    }
     dependencies {
         minecraft "net.minecraft:minecraft:$rootProject.minecraft_version"
         mappings loom.officialMojangMappings()
@@ -47,22 +56,6 @@ subprojects {
     tasks.withType(JavaCompile).configureEach {
         it.options.release = 21
     }
-    modrinth{
-        if (project.hasProperty('modrinth.apikey')) { // $GRADLE_USER_HOME/gradle.properties
-            token = project.getProperty("modrinth.apikey") // Use an environment property!
-            projectId = 'rbJ7eS5V'
-            versionNumber = "${project.mod_version}-${project.minecraft_version}"
-            versionName = "DiscordIntegration ${project.mod_version} (MC ${project.minecraft_version})"
-            uploadFile = remapJar
-            changelog = project.changelog
-            gameVersions = ["${project.minecraft_version}"]
-            loaders = ['fabric', 'forge']
-            dependencies {
-                required.project "fabric-api"
-                optional.project "no-chat-reports"
-            }
 
-            versionType = project.releaseType.toUpperCase()
-        }
-    }
+
 }

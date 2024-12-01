@@ -9,7 +9,7 @@ import net.neoforged.neoforge.server.permission.PermissionAPI;
 
 import java.util.UUID;
 
-public class ArchitecturyServerInterfaceImpl {
+public class ServerInterfaceImpl {
     public static String getLoaderNameX() {
         return "Forge";
     }

@@ -3,7 +3,7 @@ package de.erdbeerbaerlp.dcintegration.architectury.mixin;
 import com.mojang.authlib.GameProfile;
 import dcshadow.net.kyori.adventure.text.Component;
 import dcshadow.net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
-import de.erdbeerbaerlp.dcintegration.architectury.util.ArchitecturyMessageUtils;
+import de.erdbeerbaerlp.dcintegration.architectury.util.MessageUtilsImpl;
 import de.erdbeerbaerlp.dcintegration.common.DiscordIntegration;
 import de.erdbeerbaerlp.dcintegration.common.WorkThread;
 import de.erdbeerbaerlp.dcintegration.common.compat.FloodgateUtils;
@@ -80,7 +80,7 @@ public class PlayerManagerMixin {
                         final EmbedBuilder b = Configuration.instance().embedMode.playerJoinMessage.toEmbedJson(Configuration.instance().embedMode.playerJoinMessage.customJSON
                                 .replace("%uuid%", p.getUUID().toString())
                                 .replace("%uuid_dashless%", p.getUUID().toString().replace("-", ""))
-                                .replace("%name%", ArchitecturyMessageUtils.formatPlayerName(p))
+                                .replace("%name%", MessageUtilsImpl.formatPlayerName(p))
                                 .replace("%randomUUID%", UUID.randomUUID().toString())
                                 .replace("%avatarURL%", avatarURL)
                                 .replace("%playerColor%", "" + TextColors.generateFromUUID(p.getUUID()).getRGB())
@@ -88,12 +88,12 @@ public class PlayerManagerMixin {
                         DiscordIntegration.INSTANCE.sendMessage(new DiscordMessage(b.build()));
                     } else {
                         final EmbedBuilder b = Configuration.instance().embedMode.playerJoinMessage.toEmbed();
-                        b.setAuthor(ArchitecturyMessageUtils.formatPlayerName(p), null, avatarURL)
-                                .setDescription(Localization.instance().playerJoin.replace("%player%", ArchitecturyMessageUtils.formatPlayerName(p)));
+                        b.setAuthor(MessageUtilsImpl.formatPlayerName(p), null, avatarURL)
+                                .setDescription(Localization.instance().playerJoin.replace("%player%", MessageUtilsImpl.formatPlayerName(p)));
                         DiscordIntegration.INSTANCE.sendMessage(new DiscordMessage(b.build()), INSTANCE.getChannel(Configuration.instance().advanced.serverChannelID));
                     }
                 } else
-                    DiscordIntegration.INSTANCE.sendMessage(Localization.instance().playerJoin.replace("%player%", ArchitecturyMessageUtils.formatPlayerName(p)), INSTANCE.getChannel(Configuration.instance().advanced.serverChannelID));
+                    DiscordIntegration.INSTANCE.sendMessage(Localization.instance().playerJoin.replace("%player%", MessageUtilsImpl.formatPlayerName(p)), INSTANCE.getChannel(Configuration.instance().advanced.serverChannelID));
             }
             // Fix link status (if user does not have role, give the role to the user, or vice versa)
             WorkThread.executeJob(() -> {

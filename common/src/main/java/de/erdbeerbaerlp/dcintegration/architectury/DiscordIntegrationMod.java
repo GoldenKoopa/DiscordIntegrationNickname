@@ -1,13 +1,12 @@
 package de.erdbeerbaerlp.dcintegration.architectury;
 
-import dcshadow.net.kyori.adventure.chat.SignedMessage;
 import dcshadow.net.kyori.adventure.text.Component;
 import dcshadow.net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import de.erdbeerbaerlp.dcintegration.architectury.api.ArchitecturyDiscordEventHandler;
 import de.erdbeerbaerlp.dcintegration.architectury.command.McCommandDiscord;
 import de.erdbeerbaerlp.dcintegration.architectury.metrics.Metrics;
-import de.erdbeerbaerlp.dcintegration.architectury.util.ArchitecturyMessageUtils;
-import de.erdbeerbaerlp.dcintegration.architectury.util.ArchitecturyServerInterface;
+import de.erdbeerbaerlp.dcintegration.architectury.util.MessageUtilsImpl;
+import de.erdbeerbaerlp.dcintegration.architectury.util.ServerInterface;
 import de.erdbeerbaerlp.dcintegration.common.DiscordIntegration;
 import de.erdbeerbaerlp.dcintegration.common.addon.AddonLoader;
 import de.erdbeerbaerlp.dcintegration.common.addon.DiscordAddonMeta;
@@ -17,7 +16,9 @@ import de.erdbeerbaerlp.dcintegration.common.storage.Localization;
 import de.erdbeerbaerlp.dcintegration.common.storage.linking.LinkManager;
 import de.erdbeerbaerlp.dcintegration.common.util.*;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.middleman.GuildMessageChannel;
 import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 import net.dv8tion.jda.api.utils.messages.MessageCreateData;
@@ -30,8 +31,10 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
+import java.util.regex.Pattern;
 
-import static de.erdbeerbaerlp.dcintegration.common.DiscordIntegration.*;
+import static de.erdbeerbaerlp.dcintegration.common.DiscordIntegration.INSTANCE;
+import static de.erdbeerbaerlp.dcintegration.common.DiscordIntegration.LOGGER;
 
 public final class DiscordIntegrationMod {
     public static final String MOD_ID = "dcintegration";
@@ -57,7 +60,7 @@ public final class DiscordIntegrationMod {
 
     public static void serverStarting(MinecraftServer minecraftServer) {
         server = minecraftServer;
-        DiscordIntegration.INSTANCE = new DiscordIntegration(new ArchitecturyServerInterface());
+        DiscordIntegration.INSTANCE = new DiscordIntegration(new ServerInterface());
         try {
             //Wait a short time to allow JDA to get initiaized
             DiscordIntegration.LOGGER.info("Waiting for JDA to initialize to send starting message... (max 5 seconds before skipping)");
@@ -112,11 +115,11 @@ public final class DiscordIntegrationMod {
                 }
             DiscordIntegration.INSTANCE.startThreads();
         }
-        UpdateChecker.runUpdateCheck("https://raw.githubusercontent.com/ErdbeerbaerLP/Discord-Integration-Fabric/1.20.2/update-checker.json");
+        UpdateChecker.runUpdateCheck("https://raw.githubusercontent.com/ErdbeerbaerLP/DiscordIntegration/1.21.1/update-checker.json");
         if (!DownloadSourceChecker.checkDownloadSource(new File(DiscordIntegrationMod.class.getProtectionDomain().getCodeSource().getLocation().getPath().split("%")[0]))) {
             LOGGER.warn("You likely got this mod from a third party website.");
             LOGGER.warn("Some of such websites are distributing malware or old versions.");
-            LOGGER.warn("Download this mod from an official source (https://www.curseforge.com/minecraft/mc-mods/dcintegration) to hide this message");
+            LOGGER.warn("Download this mod from an official source (https://modrinth.com/plugin/dcintegration) to hide this message");
             LOGGER.warn("This warning can also be suppressed in the config file");
         }
 
@@ -170,24 +173,22 @@ public final class DiscordIntegrationMod {
     }
 
 
-
-
-
-
+    private static final Pattern mentionPattern = Pattern.compile("@([a-z0-9_.]{2,32})");
+    private static final Pattern legacyMentionPattern = Pattern.compile("@(.{3,32}#[0-9]{4})");
 
 
     public static PlayerChatMessage handleChatMessage(PlayerChatMessage message, ServerPlayer player) {
         if (DiscordIntegration.INSTANCE == null) return message;
-        if (!((ArchitecturyServerInterface)DiscordIntegration.INSTANCE.getServerInterface()).playerHasPermissions(player, MinecraftPermission.SEMD_MESSAGES, MinecraftPermission.USER))
+        if (!((ServerInterface) DiscordIntegration.INSTANCE.getServerInterface()).playerHasPermissions(player, MinecraftPermission.SEMD_MESSAGES, MinecraftPermission.USER))
             return message;
         if (LinkManager.isPlayerLinked(player.getUUID()) && LinkManager.getLink(null, player.getUUID()).settings.hideFromDiscord) {
             return message;
         }
 
         final PlayerChatMessage finalMessage = message;
-        final String text = MessageUtils.escapeMarkdown(message.decoratedContent().getString());
-        final MessageEmbed embed = ArchitecturyMessageUtils.genItemStackEmbedIfAvailable(message.decoratedContent(), player.level());
+        final MessageEmbed embed = MessageUtilsImpl.genItemStackEmbedIfAvailable(message.decoratedContent(), player.level());
         if (DiscordIntegration.INSTANCE != null) {
+            String text = message.decoratedContent().getString();
             if (DiscordIntegration.INSTANCE.callEvent((e) -> {
                 if (e instanceof ArchitecturyDiscordEventHandler) {
                     return ((ArchitecturyDiscordEventHandler) e).onMcChatMessage(finalMessage.decoratedContent(), player);
@@ -203,9 +204,38 @@ public final class DiscordIntegrationMod {
             final String json = net.minecraft.network.chat.Component.Serializer.toJson(message.decoratedContent(), player.level().registryAccess());
 
             final Component comp = GsonComponentSerializer.gson().deserialize(json);
-            if(INSTANCE.callEvent((e)->e.onMinecraftMessage(comp, player.getUUID()))){
+            if (INSTANCE.callEvent((e) -> e.onMinecraftMessage(comp, player.getUUID()))) {
                 return message;
             }
+
+            if (!Configuration.instance().compatibility.disableParsingMentionsIngame && text.contains("@")) {
+                text = mentionPattern.matcher(text).replaceAll(mr -> {
+                    final String username = mr.group(1);
+                    LOGGER.info(username);
+                    for (Member member : INSTANCE.getChannel().getGuild().getMembersByName(username, false)) {
+                        return member.getAsMention();
+                    }
+                    for (User user : INSTANCE.getJDA().getUsersByName(username, false)) {
+                        return user.getAsMention();
+                    }
+                    return mr.group(0);
+                });
+                if (text.contains("#"))
+                    text = legacyMentionPattern.matcher(text).replaceAll(mr -> {
+                        final String tag = mr.group(1);
+                        LOGGER.info(tag);
+                        final Member member = INSTANCE.getChannel().getGuild().getMemberByTag(tag);
+                        if (member != null) {
+                            return member.getAsMention();
+                        }
+                        final User user = INSTANCE.getJDA().getUserByTag(tag);
+                        if (user != null) {
+                            return user.getAsMention();
+                        }
+                        return mr.group(0);
+                    });
+            }
+            text = MessageUtils.escapeMarkdown(text);
             if (!Localization.instance().discordChatMessage.isBlank())
                 if (Configuration.instance().embedMode.enabled && Configuration.instance().embedMode.chatMessages.asEmbed) {
                     final String avatarURL = Configuration.instance().webhook.playerAvatarURL.replace("%uuid%", player.getUUID().toString()).replace("%uuid_dashless%", player.getUUID().toString().replace("-", "")).replace("%name%", player.getName().getString()).replace("%randomUUID%", UUID.randomUUID().toString());
@@ -213,27 +243,27 @@ public final class DiscordIntegrationMod {
                         final EmbedBuilder b = Configuration.instance().embedMode.chatMessages.toEmbedJson(Configuration.instance().embedMode.chatMessages.customJSON
                                 .replace("%uuid%", player.getUUID().toString())
                                 .replace("%uuid_dashless%", player.getUUID().toString().replace("-", ""))
-                                .replace("%name%", ArchitecturyMessageUtils.formatPlayerName(player))
+                                .replace("%name%", MessageUtilsImpl.formatPlayerName(player))
                                 .replace("%randomUUID%", UUID.randomUUID().toString())
                                 .replace("%avatarURL%", avatarURL)
                                 .replace("%msg%", text)
                                 .replace("%playerColor%", "" + TextColors.generateFromUUID(player.getUUID()).getRGB())
                         );
-                        DiscordIntegration.INSTANCE.sendMessage(new DiscordMessage(b.build()),INSTANCE.getChannel(Configuration.instance().advanced.chatOutputChannelID));
+                        DiscordIntegration.INSTANCE.sendMessage(new DiscordMessage(b.build()), INSTANCE.getChannel(Configuration.instance().advanced.chatOutputChannelID));
                     } else {
                         EmbedBuilder b = Configuration.instance().embedMode.chatMessages.toEmbed();
                         if (Configuration.instance().embedMode.chatMessages.generateUniqueColors)
                             b = b.setColor(TextColors.generateFromUUID(player.getUUID()));
-                        b = b.setAuthor(ArchitecturyMessageUtils.formatPlayerName(player), null, avatarURL)
+                        b = b.setAuthor(MessageUtilsImpl.formatPlayerName(player), null, avatarURL)
                                 .setDescription(text);
-                        DiscordIntegration.INSTANCE.sendMessage(new DiscordMessage(b.build()),INSTANCE.getChannel(Configuration.instance().advanced.chatOutputChannelID));
+                        DiscordIntegration.INSTANCE.sendMessage(new DiscordMessage(b.build()), INSTANCE.getChannel(Configuration.instance().advanced.chatOutputChannelID));
                     }
                 } else
-                    DiscordIntegration.INSTANCE.sendMessage(ArchitecturyMessageUtils.formatPlayerName(player), player.getUUID().toString(), new DiscordMessage(embed, text, true), channel);
+                    DiscordIntegration.INSTANCE.sendMessage(MessageUtilsImpl.formatPlayerName(player), player.getUUID().toString(), new DiscordMessage(embed, text, true), channel);
 
             if (!Configuration.instance().compatibility.disableParsingMentionsIngame) {
                 final String editedJson = GsonComponentSerializer.gson().serialize(MessageUtils.mentionsToNames(comp, channel.getGuild()));
-                final MutableComponent txt = net.minecraft.network.chat.Component.Serializer.fromJson(editedJson,player.level().registryAccess());
+                final MutableComponent txt = net.minecraft.network.chat.Component.Serializer.fromJson(editedJson, player.level().registryAccess());
                 message = message.withUnsignedContent(txt);
             }
         }

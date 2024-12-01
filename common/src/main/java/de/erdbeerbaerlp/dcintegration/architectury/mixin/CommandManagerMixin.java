@@ -3,7 +3,7 @@ package de.erdbeerbaerlp.dcintegration.architectury.mixin;
 import com.mojang.brigadier.ParseResults;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dcshadow.net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
-import de.erdbeerbaerlp.dcintegration.architectury.util.ArchitecturyServerInterface;
+import de.erdbeerbaerlp.dcintegration.architectury.util.ServerInterface;
 import de.erdbeerbaerlp.dcintegration.common.DiscordIntegration;
 import de.erdbeerbaerlp.dcintegration.common.minecraftCommands.MCSubCommand;
 import de.erdbeerbaerlp.dcintegration.common.minecraftCommands.McCommandRegistry;
@@ -83,10 +83,10 @@ public class CommandManagerMixin {
                             case PLAYER_ONLY:
                                 try {
                                     final ServerPlayer player = source.getPlayerOrException();
-                                    if (!mcSubCommand.needsOP() && ((ArchitecturyServerInterface) DiscordIntegration.INSTANCE.getServerInterface()).playerHasPermissions(player, MinecraftPermission.RUN_DISCORD_COMMAND, MinecraftPermission.USER)) {
+                                    if (!mcSubCommand.needsOP() && ((ServerInterface) DiscordIntegration.INSTANCE.getServerInterface()).playerHasPermissions(player, MinecraftPermission.RUN_DISCORD_COMMAND, MinecraftPermission.USER)) {
                                         final String txt = GsonComponentSerializer.gson().serialize(mcSubCommand.execute(cmdArgs, player.getUUID()));
                                         source.sendSuccess(() -> Component.Serializer.fromJson(txt, player.level().registryAccess()), false);
-                                    } else if (((ArchitecturyServerInterface) DiscordIntegration.INSTANCE.getServerInterface()).playerHasPermissions(player, MinecraftPermission.RUN_DISCORD_COMMAND_ADMIN)) {
+                                    } else if (((ServerInterface) DiscordIntegration.INSTANCE.getServerInterface()).playerHasPermissions(player, MinecraftPermission.RUN_DISCORD_COMMAND_ADMIN)) {
                                         final String txt = GsonComponentSerializer.gson().serialize(mcSubCommand.execute(cmdArgs, player.getUUID()));
                                         source.sendSuccess(() -> Component.Serializer.fromJson(txt, player.level().registryAccess()), false);
                                     } else if (source.hasPermission(4)) {
@@ -103,10 +103,10 @@ public class CommandManagerMixin {
                             case BOTH:
                                 try {
                                     final ServerPlayer player = source.getPlayerOrException();
-                                    if (!mcSubCommand.needsOP() && ((ArchitecturyServerInterface) DiscordIntegration.INSTANCE.getServerInterface()).playerHasPermissions(player, MinecraftPermission.RUN_DISCORD_COMMAND, MinecraftPermission.USER)) {
+                                    if (!mcSubCommand.needsOP() && ((ServerInterface) DiscordIntegration.INSTANCE.getServerInterface()).playerHasPermissions(player, MinecraftPermission.RUN_DISCORD_COMMAND, MinecraftPermission.USER)) {
                                         final String txt = GsonComponentSerializer.gson().serialize(mcSubCommand.execute(cmdArgs, player.getUUID()));
                                         source.sendSuccess(() -> Component.Serializer.fromJson(txt, VanillaRegistries.createLookup()), false);
-                                    } else if (((ArchitecturyServerInterface) DiscordIntegration.INSTANCE.getServerInterface()).playerHasPermissions(player, MinecraftPermission.RUN_DISCORD_COMMAND_ADMIN)) {
+                                    } else if (((ServerInterface) DiscordIntegration.INSTANCE.getServerInterface()).playerHasPermissions(player, MinecraftPermission.RUN_DISCORD_COMMAND_ADMIN)) {
                                         final String txt = GsonComponentSerializer.gson().serialize(mcSubCommand.execute(cmdArgs, player.getUUID()));
                                         source.sendSuccess(() -> Component.Serializer.fromJson(txt, VanillaRegistries.createLookup()), false);
                                     } else if (source.hasPermission(4)) {

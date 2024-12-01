@@ -1,9 +1,11 @@
 package de.erdbeerbaerlp.dcintegration.architectury.neoforge;
 
+import de.erdbeerbaerlp.dcintegration.common.compat.DynmapListener;
 import de.erdbeerbaerlp.dcintegration.common.storage.Configuration;
 import de.erdbeerbaerlp.dcintegration.common.util.MinecraftPermission;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.ModList;
 import net.neoforged.fml.common.Mod;
 
 import de.erdbeerbaerlp.dcintegration.architectury.DiscordIntegrationMod;
@@ -38,6 +40,10 @@ public final class DiscordIntegrationForge {
     @SubscribeEvent
     public void serverStarting(final ServerStartingEvent ev) {
         DiscordIntegrationMod.serverStarting(ev.getServer());
+
+        if (ModList.get().getModContainerById("dynmap").isPresent()) {
+            new DynmapListener().register();
+        }
     }
     @SubscribeEvent
     public void serverStarted(final ServerStartedEvent ev) {

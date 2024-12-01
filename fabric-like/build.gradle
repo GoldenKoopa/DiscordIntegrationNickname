@@ -1,0 +1,26 @@
+architectury {
+    common rootProject.enabled_platforms.split(',')
+}
+
+dependencies {
+    modImplementation "net.fabricmc:fabric-loader:$rootProject.fabric_loader_version"
+    modImplementation "net.fabricmc.fabric-api:fabric-api:$rootProject.fabric_api_version"
+
+    compileOnly(project(path: ':common', configuration: 'namedElements')) { transitive false }
+
+    modImplementation "de.erdbeerbaerlp:dcintegration.common:$rootProject.core_version"
+
+    modImplementation('me.lucko:fabric-permissions-api:0.2-SNAPSHOT')
+    modImplementation("eu.pb4:placeholder-api:2.4.0-pre.1+1.20.5")
+    modCompileOnly "maven.modrinth:styled-chat:2.6.0+1.21"
+}
+repositories {
+    maven {
+        name = "Modrinth"
+        url = "https://api.modrinth.com/maven"
+        content {
+            includeGroup "maven.modrinth"
+        }
+    }
+    maven { url "https://maven.nucleoid.xyz/" }
+}

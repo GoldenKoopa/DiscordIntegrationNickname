@@ -1,4 +1,4 @@
-package de.erdbeerbaerlp.dcintegration.architectury.fabric.mixin;
+package de.erdbeerbaerlp.dcintegration.architectury.fabriclike.mixin;
 
 import de.erdbeerbaerlp.dcintegration.architectury.DiscordIntegrationMod;
 import eu.pb4.styledchat.StyledChatUtils;

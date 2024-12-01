@@ -1,5 +1,7 @@
 plugins {
     id 'com.github.johnrengelman.shadow'
+    id "com.modrinth.minotaur"
+    id "com.matthewprenger.cursegradle"
 }
 
 architectury {
@@ -43,8 +45,9 @@ dependencies {
 
     common(project(path: ':common', configuration: 'namedElements')) { transitive false }
     shadowBundle project(path: ':common', configuration: 'transformProductionFabric')
+    common(project(path: ':fabric-like', configuration: 'namedElements')) { transitive false }
+    shadowBundle project(path: ':fabric-like', configuration: 'transformProductionFabric')
 
-    modImplementation "de.erdbeerbaerlp:dcintegration.common:$rootProject.core_version"
     include "de.erdbeerbaerlp:dcintegration.common:$rootProject.core_version"
 
     include(modImplementation('me.lucko:fabric-permissions-api:0.3.3'))
@@ -68,3 +71,38 @@ shadowJar {
 remapJar {
     input.set shadowJar.archiveFile
 }
+modrinth{
+    if (project.hasProperty('modrinth.apikey')) { // $GRADLE_USER_HOME/gradle.properties
+        token = project.getProperty("modrinth.apikey") // Use an environment property!
+        projectId = 'rbJ7eS5V'
+        versionNumber = "${project.mod_version}-${project.minecraft_version}"
+        versionName = "DiscordIntegration-Fabric ${project.mod_version} (MC ${project.minecraft_version})"
+        uploadFile = remapJar
+        changelog = project.changelog
+        gameVersions = ["${project.minecraft_version}"]
+        loaders = ['fabric']
+        dependencies {
+            required.project "fabric-api"
+        }
+        versionType = project.releaseType.toUpperCase()
+    }
+}
+curseforge {
+    if (project.hasProperty('curseforge.apikey')) { // $GRADLE_USER_HOME/gradle.properties
+        apiKey = getProperty("curseforge.apikey")
+        project {
+            id = '493679'
+            changelog = project.changelog
+            releaseType = project.releaseType.toLowerCase()
+            addGameVersion "${project.minecraft_version}"
+            mainArtifact(jar) {
+                displayName = "DiscordIntegration-Fabric ${project.mod_version} (MC ${project.minecraft_version})"
+            }
+            relations {
+                requiredDependency("fabric-api")
+            }
+        }
+    }
+}
+
+tasks.release.dependsOn(tasks.build, tasks.curseforge, tasks.modrinth)

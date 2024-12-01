@@ -2,8 +2,7 @@ package de.erdbeerbaerlp.dcintegration.architectury.metrics;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import de.erdbeerbaerlp.dcintegration.architectury.DiscordIntegrationMod;
-import de.erdbeerbaerlp.dcintegration.architectury.util.ArchitecturyServerInterface;
+import de.erdbeerbaerlp.dcintegration.architectury.util.ServerInterface;
 import de.erdbeerbaerlp.dcintegration.common.DiscordIntegration;
 import net.minecraft.server.MinecraftServer;
 import org.apache.logging.log4j.LogManager;
@@ -112,8 +111,8 @@ public class Metrics {
             LOGGER.warn("Unknown environment, assuming offline mode");
             builder.appendField("onlineMode", 0);
         }*/
-        builder.appendField("bukkitVersion", ((ArchitecturyServerInterface)DiscordIntegration.INSTANCE.getServerInterface()).getLoaderVersion());
-        builder.appendField("bukkitName", ((ArchitecturyServerInterface)DiscordIntegration.INSTANCE.getServerInterface()).getLoaderName());
+        builder.appendField("bukkitVersion", ServerInterface.getLoaderVersion());
+        builder.appendField("bukkitName", DiscordIntegration.INSTANCE.getServerInterface().getLoaderName());
         builder.appendField("javaVersion", System.getProperty("java.version"));
         builder.appendField("osName", System.getProperty("os.name"));
         builder.appendField("osArch", System.getProperty("os.arch"));
@@ -122,7 +121,6 @@ public class Metrics {
     }
 
     private void appendServiceData(JsonObjectBuilder builder) {
-        //noinspection OptionalGetWithoutIsPresent
         builder.appendField("pluginVersion", DiscordIntegration.VERSION);
     }
 
