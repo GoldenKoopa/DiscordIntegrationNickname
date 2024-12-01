@@ -40,7 +40,7 @@ public class AdvancementMixin {
 
             if (!Localization.instance().advancementMessage.isBlank()) {
                 if (Configuration.instance().embedMode.enabled && Configuration.instance().embedMode.advancementMessage.asEmbed) {
-                    final String avatarURL = Configuration.instance().webhook.playerAvatarURL.replace("%uuid%", player.getUUID().toString()).replace("%uuid_dashless%", player.getUUID().toString().replace("-", "")).replace("%name%", player.getName().getString()).replace("%randomUUID%", UUID.randomUUID().toString());
+                    final String avatarURL = INSTANCE.getSkinURL().replace("%uuid%", player.getUUID().toString()).replace("%uuid_dashless%", player.getUUID().toString().replace("-", "")).replace("%name%", player.getName().getString()).replace("%randomUUID%", UUID.randomUUID().toString());
                     if (!Configuration.instance().embedMode.advancementMessage.customJSON.isBlank()) {
                         final EmbedBuilder b = Configuration.instance().embedMode.advancementMessage.toEmbedJson(Configuration.instance().embedMode.advancementMessage.customJSON
                                 .replace("%uuid%", player.getUUID().toString())

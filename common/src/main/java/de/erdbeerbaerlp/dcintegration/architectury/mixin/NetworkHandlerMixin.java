@@ -42,7 +42,7 @@ public class NetworkHandlerMixin {
         if (reason.equals(Component.translatable("disconnect.timeout")))
             DiscordIntegrationMod.timeouts.add(this.player.getUUID());
         INSTANCE.callEventC((a)->a.onPlayerLeave(player.getUUID()));
-        final String avatarURL = Configuration.instance().webhook.playerAvatarURL.replace("%uuid%", player.getUUID().toString()).replace("%uuid_dashless%", player.getUUID().toString().replace("-", "")).replace("%name%", player.getName().getString()).replace("%randomUUID%", UUID.randomUUID().toString());
+        final String avatarURL = INSTANCE.getSkinURL().replace("%uuid%", player.getUUID().toString()).replace("%uuid_dashless%", player.getUUID().toString().replace("-", "")).replace("%name%", player.getName().getString()).replace("%randomUUID%", UUID.randomUUID().toString());
         if (DiscordIntegration.INSTANCE != null && !DiscordIntegrationMod.timeouts.contains(player.getUUID())) {
             if (!Localization.instance().playerLeave.isBlank()) {
                 if (Configuration.instance().embedMode.enabled && Configuration.instance().embedMode.playerLeaveMessages.asEmbed) {
